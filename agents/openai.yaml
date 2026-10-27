@@ -1,0 +1,4 @@
+interface:
+  display_name: "Web速度改善"
+  short_description: "Webサイトの遅さを実測で切り分け、構成に合った改善と検証を行う"
+  default_prompt: "$web-performance を使って、このプロジェクトの遅い箇所を調査し、根拠のある改善と変更前後の検証を進めてください。"
