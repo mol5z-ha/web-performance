@@ -1,0 +1,2 @@
+# Preserve exact evaluation prompts and historical evidence bytes for their digests.
+evaluation/** -text -whitespace

@@ -1,0 +1,12 @@
+{
+  "nodes": [
+    {"id": "html", "duration_ms": 150, "depends_on": []},
+    {"id": "js", "duration_ms": 200, "depends_on": ["html"]},
+    {"id": "api", "duration_ms": 700, "depends_on": ["js"]},
+    {"id": "render", "duration_ms": 200, "depends_on": ["api"]},
+    {"id": "image", "duration_ms": 1800, "depends_on": ["html"]}
+  ],
+  "target": "render",
+  "optimize": "api",
+  "goal_ms": 900
+}

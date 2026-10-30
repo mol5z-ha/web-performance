@@ -34,3 +34,24 @@ python scripts/http_probe.py https://example.com/ --count 3 --interval 1
 - 接続再利用やブラウザキャッシュを再現しない。JavaScriptを動かさず、画像も取得しない。描画、LCP、操作応答や負荷耐性は別に測る。
 
 仮説を区別できる証拠と必要な比較がそろったら止める。原因が未確定なら残る候補と必要な観測を示す。調査を理由に大量アクセスしたり、本番を止めてコールド状態を作ったりしない。
+
+## 正しい本文を保つ前後比較
+
+公開された決定的なレスポンスには `--expect-sha256` で、仕様・fixtureと照合済みの期待本文のSHA-256を指定できる。本文は保存・表示せず、完全な2xxと内容一致を別々に記録する。不一致なら終了コード1。期待値を、合格させるために変更後の出力から作り直さない。
+
+```sh
+python scripts/http_probe.py https://example.com/data --count 5 --expect-sha256 <64桁のSHA256> --condition public-fixture-v1-warm --revision before > before.json
+# 対象を変更し、同じデータ・操作・起動状態等を確認した後
+python scripts/http_probe.py https://example.com/data --count 5 --expect-sha256 <同じSHA256> --condition public-fixture-v1-warm --revision after > after.json
+python scripts/compare_http.py before.json after.json
+```
+
+`condition` は操作者が確認した条件の識別子であり、自動計測で環境一致を証明する値ではない。実際の端末・データ・キャッシュ・操作等を作業記録に対応させる。revisionも実行版を照合する。秘密情報をこれらの文字列に含めない。
+
+比較は両側3〜10標本、全標本が完全な2xxかつ同一の期待本文と一致、同じ条件ラベル、異なるrevisionの場合だけ記述統計を返す。保存されたsummaryを信用せず生の標本から再計算する。負の変化率は短縮、正は悪化。範囲の重なりも返すが、統計的有意性・因果関係は判定しない。標本が少ないため実利用p95は出さない。
+
+`comparable` は入力条件の検査を通過した意味に限る。`median_change_percent` は標本中央値の記述値。範囲が重なると `performance_conclusion` は `inconclusive` とする。これは保守的な報告ルールであり、有意差検定ではない。範囲が分かれた `observed_faster` / `observed_slower` も観測の記述で、因果関係や本番効果の証明ではない。
+
+時刻・nonceなどで毎回本文が変わる場合、ハッシュ比較は不適切。プロジェクトの意味的な期待結果テストと計測を使い、JSONの記録を後から書き換えてこのツールを通さない。ハッシュ一致は仕様の正しさそのものの証明でもない。
+
+ローカルの索引実験は `python scripts/demo_index.py`。外部サービスへ接続せず、一時SQLite・ループバックHTTPだけを使う。100,000行の固定データで独立した期待値と照合し、索引前後の実行計画と7標本ずつを返す。`db_execute_fetch_ms` はSQL実行・全行取得だけの時間で、接続確立・JSON生成・HTTP・描画を含まない。HTTP全体の短縮と区別する。固定順序・OSキャッシュ等の影響を含み、出た倍率を他の案件へ転用しない。
