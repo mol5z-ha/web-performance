@@ -2,6 +2,7 @@
 """Small sequential HTTP probe, not a browser benchmark or load test."""
 
 import argparse
+import hashlib
 import json
 import math
 import statistics
@@ -43,11 +44,14 @@ def bounded_number(low, high, integer=False):
     return parse
 
 
-def probe(url, timeout=10, max_bytes=2 * 1024 * 1024):
+def probe(url, timeout=10, max_bytes=2 * 1024 * 1024, expected_sha256=None):
     start = time.perf_counter()
     result = {"status": None, "complete": False, "http_ok": False,
               "headers_ms": None, "total_ms": None, "bytes_read": 0,
               "cache_headers": {}, "error": None}
+    digest = hashlib.sha256() if expected_sha256 is not None else None
+    if digest is not None:
+        result["content_matches"] = False
     opener = urllib.request.build_opener(NoRedirect())
     request = urllib.request.Request(url, headers={
         "User-Agent": "web-performance-probe/1.0",
@@ -72,6 +76,8 @@ def probe(url, timeout=10, max_bytes=2 * 1024 * 1024):
                     result["complete"] = True
                     break
                 result["bytes_read"] += len(chunk)
+                if digest is not None:
+                    digest.update(chunk)
             if not result["complete"]:
                 result["error"] = "body_limit_exceeded"
             else:
@@ -80,6 +86,8 @@ def probe(url, timeout=10, max_bytes=2 * 1024 * 1024):
                     result["complete"] = False
                     result["error"] = "content_length_mismatch"
             result["http_ok"] = result["complete"] and 200 <= response.code < 300
+            if digest is not None:
+                result["content_matches"] = result["http_ok"] and digest.hexdigest() == expected_sha256
     except Exception as error:
         # No raw message: exception text can contain private URLs or proxy details.
         result["complete"] = False
@@ -104,16 +112,24 @@ def main():
     parser.add_argument("--interval", type=bounded_number(0.1, 60), default=1)
     parser.add_argument("--timeout", type=bounded_number(0.1, 60), default=10)
     parser.add_argument("--max-bytes", type=bounded_number(1, 8388608, True), default=2097152)
+    parser.add_argument("--expect-sha256", help="SHA-256 of a previously verified public response body")
+    parser.add_argument("--condition", help="Non-secret operation/environment/cache/data condition label")
+    parser.add_argument("--revision", help="Non-secret measured implementation revision")
     args = parser.parse_args()
+    if args.expect_sha256 is not None:
+        if len(args.expect_sha256) != 64 or any(c not in "0123456789abcdef" for c in args.expect_sha256):
+            parser.error("--expect-sha256 must be 64 lowercase hexadecimal characters")
     samples = []
     for index in range(args.count):
         if index:
             time.sleep(args.interval)
-        samples.append(probe(args.url, args.timeout, args.max_bytes))
+        samples.append(probe(args.url, args.timeout, args.max_bytes, args.expect_sha256))
     print(json.dumps({"schema_version": 1,
                       "measurement": "sequential HTTP GET; no redirects or browser rendering",
+                      "condition": args.condition, "revision": args.revision,
+                      "expected_sha256": args.expect_sha256,
                       "samples": samples, "summary": summarize(samples)}, indent=2))
-    return 0 if all(sample["http_ok"] for sample in samples) else 1
+    return 0 if all(sample["http_ok"] and sample.get("content_matches", True) for sample in samples) else 1
 
 
 if __name__ == "__main__":

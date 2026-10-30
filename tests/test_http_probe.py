@@ -1,4 +1,5 @@
 import argparse
+import hashlib
 import importlib.util
 import json
 from pathlib import Path
@@ -54,6 +55,14 @@ class ProbeTests(unittest.TestCase):
         self.assertIn("Cache-Control", result["cache_headers"])
         self.assertNotIn("private-cookie", json.dumps(result))
         self.assertLessEqual(result["headers_ms"], result["total_ms"])
+
+    def test_expected_body_distinguishes_fast_wrong_200(self):
+        good = probe.probe(self.url, expected_sha256=hashlib.sha256(b"test").hexdigest())
+        bad = probe.probe(self.url, expected_sha256=hashlib.sha256(b"expected business result").hexdigest())
+        self.assertTrue(good["content_matches"])
+        self.assertTrue(bad["http_ok"])
+        self.assertFalse(bad["content_matches"])
+        self.assertNotIn("expected business result", json.dumps(bad))
 
     def test_no_redirect_following(self):
         Handler.hits.clear()

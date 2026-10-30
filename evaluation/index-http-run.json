@@ -1,0 +1,247 @@
+﻿{
+  "experiment": "SQLite query index; fixed independent expected response",
+  "query_plans": [
+    [
+      "SCAN items"
+    ],
+    [
+      "SEARCH items USING INDEX items_category (category=?)"
+    ]
+  ],
+  "before": {
+    "schema_version": 1,
+    "measurement": "sequential HTTP GET; no redirects or browser rendering",
+    "condition": "loopback; 100000 rows; category 999; first 20 by id; cache not reset",
+    "revision": "table-scan",
+    "expected_sha256": "cd73c1ad67d83d818fa1aae8dec42c2500df6cdcad1d4cbbeb7fd0abc3d48c9e",
+    "samples": [
+      {
+        "status": 200,
+        "complete": true,
+        "http_ok": true,
+        "headers_ms": 13.32,
+        "total_ms": 13.52,
+        "bytes_read": 438,
+        "cache_headers": {
+          "Cache-Control": "no-store"
+        },
+        "error": null,
+        "content_matches": true
+      },
+      {
+        "status": 200,
+        "complete": true,
+        "http_ok": true,
+        "headers_ms": 2.46,
+        "total_ms": 2.56,
+        "bytes_read": 438,
+        "cache_headers": {
+          "Cache-Control": "no-store"
+        },
+        "error": null,
+        "content_matches": true
+      },
+      {
+        "status": 200,
+        "complete": true,
+        "http_ok": true,
+        "headers_ms": 12.99,
+        "total_ms": 13.09,
+        "bytes_read": 438,
+        "cache_headers": {
+          "Cache-Control": "no-store"
+        },
+        "error": null,
+        "content_matches": true
+      },
+      {
+        "status": 200,
+        "complete": true,
+        "http_ok": true,
+        "headers_ms": 15.69,
+        "total_ms": 15.86,
+        "bytes_read": 438,
+        "cache_headers": {
+          "Cache-Control": "no-store"
+        },
+        "error": null,
+        "content_matches": true
+      },
+      {
+        "status": 200,
+        "complete": true,
+        "http_ok": true,
+        "headers_ms": 15.21,
+        "total_ms": 15.37,
+        "bytes_read": 438,
+        "cache_headers": {
+          "Cache-Control": "no-store"
+        },
+        "error": null,
+        "content_matches": true
+      },
+      {
+        "status": 200,
+        "complete": true,
+        "http_ok": true,
+        "headers_ms": 15.43,
+        "total_ms": 15.59,
+        "bytes_read": 438,
+        "cache_headers": {
+          "Cache-Control": "no-store"
+        },
+        "error": null,
+        "content_matches": true
+      },
+      {
+        "status": 200,
+        "complete": true,
+        "http_ok": true,
+        "headers_ms": 15.59,
+        "total_ms": 15.76,
+        "bytes_read": 438,
+        "cache_headers": {
+          "Cache-Control": "no-store"
+        },
+        "error": null,
+        "content_matches": true
+      }
+    ],
+    "summary": {
+      "complete_2xx_count": 7,
+      "min_ms": 2.56,
+      "median_ms": 15.37,
+      "max_ms": 15.86
+    }
+  },
+  "after": {
+    "schema_version": 1,
+    "measurement": "sequential HTTP GET; no redirects or browser rendering",
+    "condition": "loopback; 100000 rows; category 999; first 20 by id; cache not reset",
+    "revision": "category-index",
+    "expected_sha256": "cd73c1ad67d83d818fa1aae8dec42c2500df6cdcad1d4cbbeb7fd0abc3d48c9e",
+    "samples": [
+      {
+        "status": 200,
+        "complete": true,
+        "http_ok": true,
+        "headers_ms": 23.74,
+        "total_ms": 23.87,
+        "bytes_read": 438,
+        "cache_headers": {
+          "Cache-Control": "no-store"
+        },
+        "error": null,
+        "content_matches": true
+      },
+      {
+        "status": 200,
+        "complete": true,
+        "http_ok": true,
+        "headers_ms": 14.12,
+        "total_ms": 14.23,
+        "bytes_read": 438,
+        "cache_headers": {
+          "Cache-Control": "no-store"
+        },
+        "error": null,
+        "content_matches": true
+      },
+      {
+        "status": 200,
+        "complete": true,
+        "http_ok": true,
+        "headers_ms": 15.8,
+        "total_ms": 15.99,
+        "bytes_read": 438,
+        "cache_headers": {
+          "Cache-Control": "no-store"
+        },
+        "error": null,
+        "content_matches": true
+      },
+      {
+        "status": 200,
+        "complete": true,
+        "http_ok": true,
+        "headers_ms": 15.26,
+        "total_ms": 15.37,
+        "bytes_read": 438,
+        "cache_headers": {
+          "Cache-Control": "no-store"
+        },
+        "error": null,
+        "content_matches": true
+      },
+      {
+        "status": 200,
+        "complete": true,
+        "http_ok": true,
+        "headers_ms": 16.02,
+        "total_ms": 16.24,
+        "bytes_read": 438,
+        "cache_headers": {
+          "Cache-Control": "no-store"
+        },
+        "error": null,
+        "content_matches": true
+      },
+      {
+        "status": 200,
+        "complete": true,
+        "http_ok": true,
+        "headers_ms": 15.75,
+        "total_ms": 15.94,
+        "bytes_read": 438,
+        "cache_headers": {
+          "Cache-Control": "no-store"
+        },
+        "error": null,
+        "content_matches": true
+      },
+      {
+        "status": 200,
+        "complete": true,
+        "http_ok": true,
+        "headers_ms": 1.73,
+        "total_ms": 1.9,
+        "bytes_read": 438,
+        "cache_headers": {
+          "Cache-Control": "no-store"
+        },
+        "error": null,
+        "content_matches": true
+      }
+    ],
+    "summary": {
+      "complete_2xx_count": 7,
+      "min_ms": 1.9,
+      "median_ms": 15.94,
+      "max_ms": 23.87
+    }
+  },
+  "comparison": {
+    "comparable": true,
+    "reasons": [],
+    "before": {
+      "count": 7,
+      "median_ms": 15.37,
+      "range_ms": [
+        2.56,
+        15.86
+      ]
+    },
+    "after": {
+      "count": 7,
+      "median_ms": 15.94,
+      "range_ms": [
+        1.9,
+        23.87
+      ]
+    },
+    "median_change_percent": 3.71,
+    "ranges_overlap": true,
+    "interpretation": "Descriptive local HTTP comparison; not causality, browser speed, p95 or a population guarantee."
+  },
+  "limits": "Fixed before-after order and OS cache confound timing; query plans establish changed access path. No browser or production claim."
+}
